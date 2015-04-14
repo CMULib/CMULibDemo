@@ -165,7 +165,7 @@ public class MatOp {
 	
 	public static Mat vectorNormalize(Mat src, NormType normType){
 		double sum = norm(src, normType);
-		return src.mul(1/sum);
+		return src.mul(1.0/sum);
 	}
 	/**
 	 * Calculate distance between two vectors.
