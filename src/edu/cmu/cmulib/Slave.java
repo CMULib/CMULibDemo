@@ -36,10 +36,10 @@ public class Slave {
         int port = Integer.parseInt(args[1]);
         int q = 0;
 
-        String dir = "tachyon://localhost:19998";
-        String fileName = "/BinData";
-        //String dir = "/Users/yiranfei/Desktop";
+        //String dir = "tachyon://localhost:19998";
         //String fileName = "/BinData";
+        String dir = "./resource";
+        String fileName = "/BinData";
 
         try {
             FileSystemInitializer fs = new TachyonInitialier();

@@ -7,7 +7,7 @@ import java.io.*;
  */
 public class BinaryDataGenerator {
   public void write(double data[]) throws IOException {
-    DataOutputStream out = new DataOutputStream(new FileOutputStream("/Users/yiranfei/Desktop/BinData"));
+    DataOutputStream out = new DataOutputStream(new FileOutputStream("./resource/BinData"));
     for (int i = 0; i < 1000 * 1000; i++) {
       out.writeDouble(data[i]);
     }
@@ -49,16 +49,16 @@ public class BinaryDataGenerator {
 
     return test;
   }
-/*
+
   public static void main(String argv[]) {
-    generator g = new generator();
+    BinaryDataGenerator g = new BinaryDataGenerator();
     try {
-      double[] data = g.read("/Users/yiranfei/Documents/wp/CMU-Lib/svd.data.txt");
+      double[] data = g.read("./resource/svd.data.txt");
       g.write(data);
-      g.readtest("/Users/yiranfei/Desktop/BinData");
+      //g.readtest("/Users/yiranfei/Desktop/BinData");
     } catch (IOException e) {
       e.printStackTrace();
     }
   }
-*/
+
 }

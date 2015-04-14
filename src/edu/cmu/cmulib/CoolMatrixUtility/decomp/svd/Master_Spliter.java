@@ -1,4 +1,4 @@
-package cmu.decomp.svd;
+package edu.cmu.cmulib.CoolMatrixUtility.decomp.svd;
 
 
 import java.io.BufferedReader;
@@ -6,8 +6,8 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
 
-import cmu.core.*;
-import cmu.help.Tag;
+import edu.cmu.cmulib.CoolMatrixUtility.core.*;
+import edu.cmu.cmulib.CoolMatrixUtility.help.Tag;
 
 /**
  * Master_Spliter is used to Split the whole Score Array into pieces. 

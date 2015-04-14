@@ -24,14 +24,14 @@ public class Master {
         // 4 slaves assumed
         double[] test = new double[1000 * 1000];
         int q = 0;
-        int slaveNum = 2;
+        int slaveNum = 3;
         LinkedList<Double[]> mList = new LinkedList<Double[]>();
 
-        String dir = "tachyon://localhost:19998";
-        String fileName = "/BinData";
-
-        //String dir = "/Users/yiranfei/Desktop";
+        //String dir = "tachyon://localhost:19998";
         //String fileName = "/BinData";
+
+        String dir = "./resource";
+        String fileName = "/BinData";
 
         try {
             FileSystemInitializer fs = new TachyonInitialier();
