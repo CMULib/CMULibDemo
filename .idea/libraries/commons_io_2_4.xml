@@ -11,9 +11,6 @@
       <root url="jar://$PROJECT_DIR$/lib/tachyon-0.6.2.jar!/" />
     </CLASSES>
     <JAVADOC />
-    <NATIVE>
-      <root url="jar://$PROJECT_DIR$/lib/mtj-1.0.2-SNAPSHOT-jar-with-dependencies.jar!/" />
-    </NATIVE>
     <SOURCES />
   </library>
 </component>
