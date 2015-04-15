@@ -1,4 +1,4 @@
-package edu.cmu.cmulib.tests;
+package edu.cmu.cmulib.test;
 
 import static org.junit.Assert.assertNotNull;
 

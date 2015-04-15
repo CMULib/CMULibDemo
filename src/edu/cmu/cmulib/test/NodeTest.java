@@ -1,9 +1,8 @@
-package edu.cmu.cmulib.tests;
+package edu.cmu.cmulib.test;
 
 import static org.junit.Assert.assertNotNull;
 
 import java.io.IOException;
-import java.net.Socket;
 
 import org.junit.After;
 import org.junit.Before;
@@ -31,7 +30,7 @@ public class NodeTest {
     private CommonPacket packet;
     private String masterAddress;
     private int masterPort;
-    //rivate MiddleWare myMidd;
+    //private MiddleWare myMidd;
 
     /**
      * Called before each test.
@@ -41,8 +40,8 @@ public class NodeTest {
     @Before
     public void setUp() throws IOException {
         // comment/uncomment these lines to test each class
-        mNode = new MasterNode(mid);
-        sNode = new SlaveNode(slaveName);
+        //mNode = new MasterNode(mid);
+        //sNode = new SlaveNode(slaveName);
         sNode2 = new SlaveNode(masterAddress, masterPort, mid);
     }
     @Test

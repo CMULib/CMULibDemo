@@ -1,4 +1,4 @@
-package edu.cmu.cmulib.tests;
+package edu.cmu.cmulib.test;
 
 import static org.junit.Assert.assertNotNull;
 
@@ -23,7 +23,8 @@ public class MessageTest {
     //private int opCode;
     private String message;
     private int matrixInteger[][];
-    private double matrixDouble[][];
+    private double matrixDouble;
+    private double matrixDouble2[][];
     private int matrixIntegerM;
     private int matrixIntegerN;
     private Message msg;
@@ -48,7 +49,7 @@ public class MessageTest {
     public void testRunningBlocks() throws Exception{
         assertNotNull(msg.buildParameter(matrixDouble));
         assertNotNull(msg.buildMatrix(matrixInteger, matrixIntegerM, matrixIntegerN));
-        assertNotNull(msg.buildMatrixDouble(matrixDouble, matrixIntegerM, matrixIntegerN));
+        assertNotNull(msg.buildMatrixDouble(matrixDouble2, matrixIntegerM, matrixIntegerN));
         msg.extractMessage(message);
     }
 
