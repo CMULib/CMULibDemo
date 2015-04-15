@@ -138,9 +138,9 @@ public class Master {
         String dir = "./resource";
         String fileName = "/BinData";
         try {
-            FileSystemInitializer fs = new TachyonInitialier();
+            FileSystemInitializer fs = new LocalFsInitializer();
             fs.connect(dir);
-            DataHandler t = new TachyonDataHandler();
+            DataHandler t = new LocalDataHandler();
             test = t.getDataInDouble(fs.getFsHandler(), fileName, 1000 * 1000);
             System.out.println(test[1000 * 1000 - 1]);
             //sleep(10000);
