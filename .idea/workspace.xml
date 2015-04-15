@@ -1,11 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="a2fbaf3e-2fc2-4fe8-b838-d78cab5ffb7a" name="Default" comment="">
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/Demo.java" afterPath="$PROJECT_DIR$/src/Demo.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/edu/cmu/cmulib/Master.java" afterPath="$PROJECT_DIR$/src/edu/cmu/cmulib/Master.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/edu/cmu/cmulib/CoolMatrixUtility/decomp/svd/Master_SVD.java" afterPath="$PROJECT_DIR$/src/edu/cmu/cmulib/CoolMatrixUtility/decomp/svd/Master_SVD.java" />
-    </list>
+    <list default="true" id="a2fbaf3e-2fc2-4fe8-b838-d78cab5ffb7a" name="Default" comment="" />
     <ignored path="CMULibDemo.iws" />
     <ignored path=".idea/workspace.xml" />
     <ignored path=".idea/dataSources.local.xml" />
@@ -643,12 +639,12 @@
       <option name="number" value="Default" />
       <updated>1429047904038</updated>
       <workItem from="1429047906556" duration="6857000" />
-      <workItem from="1429106623788" duration="2170000" />
+      <workItem from="1429106623788" duration="2251000" />
     </task>
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="9027000" />
+    <option name="totallyTimeSpent" value="9108000" />
   </component>
   <component name="ToolWindowManager">
     <frame x="0" y="0" width="1280" height="800" extended-state="0" />
