@@ -92,12 +92,12 @@ public class Master_SVD {
      * update L when new slaveL come
      */
     public void update_SVD (Mat slaveL) {
-        if (updateNum >= subNum) {
-            updateNum = 0;
-        }
+//        if (updateNum >= subNum) {
+//            updateNum = 0;
+//        }
         slaveL = slaveL.mul((1-ALPHA)/subNum);
         this.updateL = MatOp.add(this.updateL, slaveL);
-        updateNum++;
+       // updateNum++;
     }
   
 }

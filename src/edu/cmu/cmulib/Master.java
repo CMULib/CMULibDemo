@@ -1,5 +1,7 @@
 package edu.cmu.cmulib;
 
+import java.io.BufferedReader;
+import java.io.FileReader;
 import java.util.ArrayList;
 import java.util.LinkedList;
 
@@ -27,111 +29,114 @@ import static java.lang.Thread.sleep;
     String final = master.dispFinal();
   */
 public class Master {
-    private Mat score;
-    private Mat Like;
-    private Master_Spliter split;
-    private Master_SVD svd;
-    private MasterMiddleWare commu;
-    private LinkedList<Double[]> mList;
-    public int slaveNum;
-    public String dir;
-    public String fileName;
-    public int port;
-
-    public Master() {
-        this.slaveNum = 3;
-        this.dir = "./resource";
-        this.fileName = "/BinData";
-        this.port = 8888;
-    }
-    public Master(int slaveNum, String dir, String fileName, int port) {
-        this.slaveNum = slaveNum;
-        this.dir = dir;
-        this.fileName = fileName;
-        this.port = port;
-    }
-    public void init() throws IOException {
-        double[] test = new double[1000*1000];
-        mList = new LinkedList<Double[]>();
-        try {
-            FileSystemInitializer fs = new TachyonInitialier();
-            fs.connect(dir);
-            DataHandler t = new TachyonDataHandler();
-            test = t.getDataInDouble(fs.getFsHandler(), fileName, 1000 * 1000);
-            System.out.println(test[1000 * 1000 - 1]);
-            //sleep(10000);
-        } catch (IOException e) {
-        }
-
-        // initialize original matrix
-        int rows = 1000;
-        int cols = 1000;
-        this.score = new Mat(rows, cols ,test);
-
-        commu = new MasterMiddleWare(port);
-        commu.register(Double[].class,mList);
-        commu.startMaster();
-
-        this.split = new Master_Spliter(score, slaveNum);
-        this.svd = new Master_SVD(score, slaveNum);
-        while(commu.slaveNum()<slaveNum){System.out.println(commu.slaveNum());}
-        this.Like = svd.initL();
-    }
-    public String execute() {
-        Tag tag;
-        Mat slaveL = null;
-        // compute the first eigenvector iterately
-        int remain = slaveNum;
-        svd.setL(Like);
-        String output = dispArray(Like.data);   // information need to show
-        // send L
-        for (int i = 1; i <= slaveNum; i++){
-            sendMat(Like,i,commu);
-        }
-        //send Tag
-        ArrayList<Tag> index = split.split();
-        for(int i = 0; i < index.size(); i++) {
-            tag = index.get(i);
-            CommonPacket packet = new CommonPacket(-1,tag);
-            commu.sendPacket(i+1, packet);
-        }
-        // receive L and update
-        while (remain > 0) {
-            synchronized (mList) {
-                if (mList.size() > 0) {
-                    slaveL = getMat(mList);
-                    svd.update_SVD(slaveL);
-                    remain--;
-                }
-            }
-        }
-
-        this.Like = svd.getUpdateL();
-        MatOp.vectorNormalize(this.Like, MatOp.NormType.NORM_L2);
-        return output;
-    }
-
-    public boolean isCompleted() {
-        return svd.isPerformed();
-    }
-    public String dispFinal() {
-        String finalout = "final  " + dispArray(this.Like.data);   // final information
-        return finalout;
-    }
+//    private Mat score;
+//    private Mat Like;
+//    private Master_Spliter split;
+//    private Master_SVD svd;
+//    private MasterMiddleWare commu;
+//    private LinkedList<Double[]> mList;
+//    public int slaveNum;
+//    public String dir;
+//    public String fileName;
+//    public int port;
+//
+//    public Master() {
+//        this.slaveNum = 1;
+//        this.dir = "./resource";
+//        this.fileName = "/BinData";
+//        this.port = 8888;
+//    }
+//    public Master(int slaveNum, String dir, String fileName, int port) {
+//        this.slaveNum = slaveNum;
+//        this.dir = dir;
+//        this.fileName = fileName;
+//        this.port = port;
+//    }
+//    public void init() throws IOException {
+//        double[] test = new double[1000*1000];
+//        mList = new LinkedList<Double[]>();
+//        try {
+//            FileSystemInitializer fs = new TachyonInitialier();
+//            fs.connect(dir);
+//            DataHandler t = new TachyonDataHandler();
+//            test = t.getDataInDouble(fs.getFsHandler(), fileName, 1000 * 1000);
+//            System.out.println(test[1000 * 1000 - 1]);
+//            //sleep(10000);
+//        } catch (IOException e) {
+//        }
+//
+//        // initialize original matrix
+//        int rows = 1000;
+//        int cols = 1000;
+//        this.score = new Mat(rows, cols ,test);
+//
+//        commu = new MasterMiddleWare(port);
+//        commu.register(Double[].class, mList);
+//        commu.startMaster();
+//
+//        this.split = new Master_Spliter(score, slaveNum);
+//        this.svd = new Master_SVD(score, slaveNum);
+//        this.Like = svd.initL();
+//        while(commu.slaveNum()<slaveNum){System.out.println(commu.slaveNum());}
+//    }
+//    public String execute() {
+//        Tag tag;
+//        Mat slaveL = null;
+//        // compute the first eigenvector iterately
+//        int remain = slaveNum;
+//        svd.setL(Like);
+//        String output = dispArray(Like.data);   // information need to show
+//        // send L
+//        for (int i = 1; i <= slaveNum; i++){
+//            sendMat(Like,i,commu);
+//        }
+//        //send Tag
+//        ArrayList<Tag> index = split.split();
+//        for(int i = 0; i < index.size(); i++) {
+//            tag = index.get(i);
+//            CommonPacket packet = new CommonPacket(-1,tag);
+//            commu.sendPacket(i+1, packet);
+//        }
+//        // receive L and update
+//        while (remain > 0) {
+//            synchronized (mList) {
+//                if (mList.size() > 0) {
+//                    slaveL = getMat(mList);
+//                    svd.update_SVD(slaveL);
+//                    remain--;
+//                }
+//            }
+//        }
+//
+//        this.Like = svd.getUpdateL();
+//        MatOp.vectorNormalize(this.Like, MatOp.NormType.NORM_L2);
+//        return output;
+//    }
+//
+//    public boolean isCompleted() {
+//        return svd.isPerformed(Like);
+//        //return svd.isPerformed();
+//    }
+//    public String dispFinal() {
+//        String finalout = "final  " + dispArray(this.Like.data);   // final information
+//        return finalout;
+//    }
 
     public static void main(String[] args) throws IOException, InterruptedException {
         // 4 slaves assumed
         double[] test = new double[1000 * 1000];
         int q = 0;
-        int slaveNum = 3;
+        int slaveNum = 1;
         LinkedList<Double[]> mList = new LinkedList<Double[]>();
 
+
+        /*
+        Read BinData
+         */
         //String dir = "tachyon://localhost:19998";
         //String fileName = "/BinData";
-
         String dir = "./resource";
         String fileName = "/BinData";
-
         try {
             FileSystemInitializer fs = new TachyonInitialier();
             fs.connect(dir);
@@ -141,6 +146,16 @@ public class Master {
             //sleep(10000);
         } catch (IOException e) {
         }
+        /*
+        Read normal data
+         */
+//        BufferedReader br = new BufferedReader(new FileReader("./resource/svd.data.txt"));
+//        String line;
+//        while ((line = br.readLine()) != null) {
+//            test[q] = Double.parseDouble(line);
+//            q++;
+//        }
+//        br.close();
 
 
         // initialize original matrix
@@ -197,7 +212,7 @@ public class Master {
         } while (!svd.isPerformed(Like));     //termination of iteration
         System.out.println("final  ");
         printArray(Like.data);
-        
+    }
         /*
         System.out.println("PPPPPPPPPPPPPPPP");
         double [] a = {1.1, 2.2, 3.3, 4.4};
@@ -279,7 +294,6 @@ public class Master {
 
             double sum = a[0] + a[1] + a[2] + a[3];*/
         //System.out.println("sum :" + sum);
-    }
 
     public static void printArray(double[] arr) {
         for (double i : arr)
