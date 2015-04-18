@@ -42,7 +42,7 @@ public class Master {
     public int port;
 
     public Master() {
-        this.slaveNum = 1;
+        this.slaveNum = 4;
         this.dir = "./resource";
         this.fileName = "/BinData";
         this.port = 8888;
@@ -127,7 +127,7 @@ public class Master {
         // 4 slaves assumed
         double[] test = new double[1000 * 1000];
         int q = 0;
-        int slaveNum = 1;
+        int slaveNum = 4;
         LinkedList<Double[]> mList = new LinkedList<Double[]>();
 
 
@@ -176,7 +176,8 @@ public class Master {
             if(line.startsWith("show")){
                 System.out.println("Current Connected Slave : "+ commu.slaveNum());
             }else if(line.startsWith("start")){
-                svd.run();
+                Thread t = new Thread(svd);
+                t.start();
             }
         }
 

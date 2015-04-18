@@ -30,7 +30,7 @@ public class DistributedSVD implements Runnable {
     public void run() {
         //double[] test = new double[1000 * 1000];
         int q = 0;
-        int slaveNum = 1;
+
 
         int rows = 1000;
         int cols = 1000;
@@ -49,6 +49,7 @@ public class DistributedSVD implements Runnable {
         Master_SVD svd = new Master_SVD(score, slaveNum);
         if(commu.slaveNum() < slaveNum) {
             System.out.println(commu.slaveNum()+ " is less than required number");
+            System.exit(1);
         }
         Like = svd.initL();
         slaveL = null;
