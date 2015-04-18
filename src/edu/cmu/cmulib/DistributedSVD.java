@@ -16,13 +16,15 @@ import java.util.LinkedList;
  */
 public class DistributedSVD implements Runnable {
     int port;
-    public DistributedSVD(String port) {
+    double[] test;
+    public DistributedSVD(String port, double[] test) {
         this.port = Integer.parseInt(port);
+        this.test = test;
     }
 
     @Override
     public void run() {
-        double[] test = new double[1000 * 1000];
+        //double[] test = new double[1000 * 1000];
         int q = 0;
         int slaveNum = 1;
         LinkedList<Double[]> mList = new LinkedList<Double[]>();
