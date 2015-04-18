@@ -45,9 +45,13 @@ public class MasterMiddleWare implements MiddleWare {
     	packetHandler = new PacketHandler();
     }
 
-    public void startMaster() throws IOException{
-        masterNode = new MasterNode(port, this);
-        masterNode.startListen();
+    public void startMaster() {
+        try {
+            masterNode = new MasterNode(port, this);
+            masterNode.startListen();
+        }catch (IOException e){
+            System.out.println("Failed to start Master");
+        }
     }
 /*
     public void sendMatrix(int slaveId, DummyMatrix matrix){
