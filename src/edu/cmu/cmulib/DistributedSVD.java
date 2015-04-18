@@ -15,11 +15,15 @@ import java.util.LinkedList;
  * Created by handixu on 4/18/15.
  */
 public class DistributedSVD implements Runnable {
-    int port;
+    MasterMiddleWare commu ;
     double[] test;
-    public DistributedSVD(String port, double[] test) {
-        this.port = Integer.parseInt(port);
+    int slaveNum;
+    LinkedList<Double[]> mList = new LinkedList<Double[]>();
+    public DistributedSVD(MasterMiddleWare middleWare, int slaveNum, double[] test) {
+        commu = middleWare;
         this.test = test;
+        this.slaveNum = slaveNum;
+        commu.register(Double[].class, mList);
     }
 
     @Override
@@ -27,7 +31,7 @@ public class DistributedSVD implements Runnable {
         //double[] test = new double[1000 * 1000];
         int q = 0;
         int slaveNum = 1;
-        LinkedList<Double[]> mList = new LinkedList<Double[]>();
+
         int rows = 1000;
         int cols = 1000;
         Mat score = new Mat(rows, cols, test);
@@ -36,9 +40,9 @@ public class DistributedSVD implements Runnable {
 
 
 
-        MasterMiddleWare commu = new MasterMiddleWare(port);
-        commu.register(Double[].class, mList);
-        commu.startMaster();
+
+
+
 
 
         Master_Spliter split = new Master_Spliter(score, slaveNum);
