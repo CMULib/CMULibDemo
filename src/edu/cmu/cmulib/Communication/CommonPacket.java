@@ -17,7 +17,7 @@ public class CommonPacket implements Serializable {
 	
     public CommonPacket(int id, String type, Object obj){
 	    slaveId = id;
-	    type = classType;
+        classType = type;
 	    object = obj;
 	}
 	
