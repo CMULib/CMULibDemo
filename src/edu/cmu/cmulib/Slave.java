@@ -10,22 +10,91 @@ import java.util.LinkedList;
 
 import edu.cmu.cmulib.FileSystemAdaptor.*;
 import edu.cmu.cmulib.Communication.CommonPacket;
+import edu.cmu.cmulib.Utils.ConfParameter;
 
 public class Slave {
 	public int SlaveId;
 	public double workspan = Double.MAX_VALUE;
-	
-	public Slave (int SlaveId, double workspan) {
-		this.SlaveId = SlaveId;	
-		this.workspan = workspan;
-	}
+    String address = "localhost";
+    int port = 8888;
+    String dir = "./resource";
+    String fileName = "/BinData";
+
+    LinkedList<Double[]> mList = null;
+    LinkedList<Tag> tagList = null;
+    Mat score = null;
+    Mat S = null;
+    Mat L = null;
+    SlaveMiddleWare sdSlave = null;
+    Slave_getSplitedMatrix split = null;
+    Slave_SVD svd = null;
+
+    public Slave(ConfParameter conf) {
+        this.address = conf.masterAddress;
+        this.port = conf.masterPort;
+        this.dir = conf.fileDir;
+        this.fileName = conf.fileName;
+    }
 	
 	public static void printArray(double[] arr){
 		for(double i: arr)
 			System.out.print(i+" ");
 		System.out.println();
 	}
-	
+
+    public void init() throws IOException {
+        double[] test = new double[1000*1000];
+        int rows = 1000;
+        int cols = 1000;
+
+        try {
+            FileSystemInitializer fs = FileSystemAdaptorFactory.BuildFileSystemAdaptor(FileSystemType.LOCAL, dir);
+            DataHandler t = DataHandlerFactory.BuildDataHandler(FileSystemType.LOCAL);
+            test = t.getDataInDouble(fs.getFsHandler(), fileName, 1000 * 1000);
+            System.out.println(test[1000*1000-1]);
+        } catch (IOException e) {
+        }
+
+        mList = new LinkedList<Double[]>();
+        tagList = new LinkedList<Tag>();
+
+        score = new Mat(rows, cols ,test);
+
+        sdSlave = new SlaveMiddleWare(address, port);
+        sdSlave.register(Double[].class, mList);
+        sdSlave.register(Tag.class, tagList);
+        System.out.println(address + " " + port);
+        sdSlave.startSlave();
+
+        split = new Slave_getSplitedMatrix(score);
+        svd = new Slave_SVD();
+    }
+
+    public void execute() {
+        while(true){
+            //receive tag and compute L
+            synchronized (tagList) {
+                if (tagList.size() > 0) {
+                    split.setTag(tagList.peek());
+                    tagList.remove();
+                    S = split.construct();
+                    L = svd.Slave_UpdateL(S);
+                    printArray(L.data);
+                    sendMat(L,sdSlave);
+
+                }
+            }
+            //receive L
+            synchronized (mList) {
+                if (mList.size() > 0) {
+                    System.out.println("enter slave synchronized");
+                    L = getMat(mList);
+                    svd.setL(L);
+                }
+            }
+        }
+    }
+	/*
 	public static void main (String[] args) throws IOException {
         
         // initialize original matrix
@@ -42,11 +111,9 @@ public class Slave {
         String fileName = "/BinData";
 
         try {
-            FileSystemInitializer fs = new LocalFsInitializer();
-            fs.connect(dir);
-            DataHandler t = new LocalDataHandler();
+            FileSystemInitializer fs = FileSystemAdaptorFactory.BuildFileSystemAdaptor(FileSystemType.LOCAL, dir);
+            DataHandler t = DataHandlerFactory.BuildDataHandler(FileSystemType.LOCAL);
             test = t.getDataInDouble(fs.getFsHandler(), fileName, 1000 * 1000);
-//            System.out.println("//////////");
             System.out.println(test[1000*1000-1]);
         } catch (IOException e) {
         }
@@ -87,38 +154,11 @@ public class Slave {
                     System.out.println("enter slave synchronized");
                     L = getMat(mList);
                     svd.setL(L);
-
-                    
                 }
             }
-            
         }
-//		tag = commu.pullTag();
-//		split.setTag(tag);
-//		S = split.construct();
-//		svd.setS(S);
-//		L = commu.pullL();
-//		svd.setL(L);
-//		L = svd.Slave_UpdateL(S);
-//		commu.push(L);
-		
-
-        /*
-        while(true){
-        	synchronized (mList) {
-                if (mList.size() > 0) {
-                	System.out.println("enter slvae synchronized");           
-                    Mat n = getMat(mList);
-                	printArray(n.data);
-                	sendMat(n.mul(2),sdSlave);               	
-                	
-                }
-            }
-
-        }
-        */
 	}
-	
+	*/
 	
 	public static Mat getMat(LinkedList<Double[]> mList){
 		Double [] temp = mList.peek();
@@ -144,7 +184,5 @@ public class Slave {
         CommonPacket packet = new CommonPacket(-1, array);
         
         m.sendPacket(packet);
-		
 	}
-	
 }

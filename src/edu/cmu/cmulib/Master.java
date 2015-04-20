@@ -1,7 +1,5 @@
 package edu.cmu.cmulib;
 
-import java.io.BufferedReader;
-import java.io.FileReader;
 import java.util.ArrayList;
 import java.util.LinkedList;
 
@@ -10,24 +8,16 @@ import edu.cmu.cmulib.CoolMatrixUtility.core.MatOp;
 import edu.cmu.cmulib.CoolMatrixUtility.decomp.svd.Master_SVD;
 import edu.cmu.cmulib.CoolMatrixUtility.decomp.svd.Master_Spliter;
 import edu.cmu.cmulib.CoolMatrixUtility.help.Tag;
+import edu.cmu.cmulib.Utils.ConfParameter;
 
 import java.io.IOException;
 
 import edu.cmu.cmulib.FileSystemAdaptor.*;
 
 import edu.cmu.cmulib.Communication.CommonPacket;
+import edu.cmu.cmulib.Utils.JsonParser;
+import org.json.simple.parser.ParseException;
 
-import static java.lang.Thread.sleep;
-
-/*
-   How to use this
-   Master master = new Master(4, "/BinData", 8888);
-   master.init();
-   do {
-     String str = master.execute();
-   while(!master.isCompleted());
-    String final = master.dispFinal();
-  */
 public class Master {
     private Mat score;
     private Mat Like;
@@ -39,29 +29,47 @@ public class Master {
     public String dir;
     public String fileName;
     public int port;
+    public FileSystemType mFsType;
 
     public Master() {
         this.slaveNum = 1;
-        this.dir = "./resource";
-        this.fileName = "/BinData";
+        this.dir = "";
+        this.fileName = "";
         this.port = 8888;
+        this.mFsType = FileSystemType.LOCAL;
     }
-    public Master(int slaveNum, String dir, String fileName, int port) {
-        this.slaveNum = slaveNum;
-        this.dir = dir;
-        this.fileName = fileName;
-        this.port = port;
+
+    public Master(ConfParameter conf) {
+        this.slaveNum = conf.minSlaveNum;
+        this.dir = conf.fileDir;
+        this.fileName = conf.fileName;
+        this.port = conf.masterPort;
+        this.mFsType = conf.fsType;
     }
+
+    public Master(String filePath) throws IOException, ParseException {
+        JsonParser jp = new JsonParser();
+        ConfParameter conf = jp.parseFile(filePath);
+
+        this.slaveNum = conf.minSlaveNum;
+        this.dir = conf.fileDir;
+        this.fileName = conf.fileName;
+        this.port = conf.masterPort;
+        this.mFsType = conf.fsType;
+    }
+
+    public String sayHi() {
+        return "HHHHHHHHHHHHHH";
+    }
+
     public void init() throws IOException {
         double[] test = new double[1000*1000];
         mList = new LinkedList<Double[]>();
         try {
-            FileSystemInitializer fs = new TachyonInitialier();
-            fs.connect(dir);
-            DataHandler t = new TachyonDataHandler();
+            FileSystemInitializer fs = FileSystemAdaptorFactory.BuildFileSystemAdaptor(mFsType, dir);
+            DataHandler t = DataHandlerFactory.BuildDataHandler(mFsType);
             test = t.getDataInDouble(fs.getFsHandler(), fileName, 1000 * 1000);
             System.out.println(test[1000 * 1000 - 1]);
-            //sleep(10000);
         } catch (IOException e) {
         }
 
@@ -79,6 +87,7 @@ public class Master {
         this.Like = svd.initL();
         while(commu.slaveNum()<slaveNum){System.out.println(commu.slaveNum());}
     }
+
     public String execute() {
         Tag tag;
         Mat slaveL = null;
@@ -121,7 +130,7 @@ public class Master {
         String finalout = "final  " + dispArray(this.Like.data);   // final information
         return finalout;
     }
-
+/*
     public static void main(String[] args) throws IOException, InterruptedException {
         // 4 slaves assumed
         double[] test = new double[1000 * 1000];
@@ -129,36 +138,18 @@ public class Master {
         int slaveNum = 1;
         LinkedList<Double[]> mList = new LinkedList<Double[]>();
 
-
-        /*
-        Read BinData
-         */
         //String dir = "tachyon://localhost:19998";
         //String fileName = "/BinData";
         String dir = "./resource";
         String fileName = "/BinData";
         try {
-            FileSystemInitializer fs = new LocalFsInitializer();
-            fs.connect(dir);
-            DataHandler t = new LocalDataHandler();
+            FileSystemInitializer fs = FileSystemAdaptorFactory.BuildFileSystemAdaptor(FileSystemType.LOCAL, dir);
+            DataHandler t = DataHandlerFactory.BuildDataHandler(FileSystemType.LOCAL);
             test = t.getDataInDouble(fs.getFsHandler(), fileName, 1000 * 1000);
             System.out.println(test[1000 * 1000 - 1]);
-            //sleep(10000);
         } catch (IOException e) {
         }
-        /*
-        Read normal data
-         */
-//        BufferedReader br = new BufferedReader(new FileReader("./resource/svd.data.txt"));
-//        String line;
-//        while ((line = br.readLine()) != null) {
-//            test[q] = Double.parseDouble(line);
-//            q++;
-//        }
-//        br.close();
 
-
-        // initialize original matrix
         int rows = 1000;
         int cols = 1000;
         Mat score = new Mat(rows, cols, test);
@@ -213,93 +204,13 @@ public class Master {
         System.out.println("final  ");
         printArray(Like.data);
     }
-        /*
-        System.out.println("PPPPPPPPPPPPPPPP");
-        double [] a = {1.1, 2.2, 3.3, 4.4};
-        int count =0;
-        while (count<10){
-        	count++;
-        	int remain = 4;
-            while (commu.slaveNum() != slaveNum){System.out.println(commu.slaveNum());}
-            for (int i = 1; i <= slaveNum; i++){
-            	Mat mat = new Mat(2,2,a);
-        	    sendMat(mat,i,commu);
-                
-            }
-            
-            while (remain > 0) {
-            	
-                synchronized (mList) {
-                    if (mList.size() > 0) {                
-                    	Mat mat = getMat(mList);
-                    	a = mat.data;
-                    	remain--;
-                    	
-                    }
-               }
-            }
-            System.out.println(a[0]+" "+a[1]+" "+a[2]+" "+a[3]);
-        }
-        */
-        /*
-        Master_Spliter split = new Master_Spliter(score, slaveNum);
-		Master_SVD svd = new Master_SVD(score, slaveNum);
-		
-		Like = svd.initL();
-		slaveL = null;
-		do {
-			svd.setL(Like);
-			commu.push(Like);
-			ArrayList<Tag> index = split.split();
-			for(int i = 0; i < index.size(); i++) {
-				tag = index.get(i);
-				commu.push(tag);
-			}
-			for (int i = 0; i < slaveNum; i++) {
-//				do {
-					slaveL = commu.pull();
-//				} while (slaveL == null);
-				svd.update_SVD(slaveL);
-			}
-			Like = svd.getUpdateL();
-			MatOp.vectorNormalize(Like, MatOp.NormType.NORM_L2);
-//			System.out.println(Like.data[0] + "  " + Like.data[1]+ "  " + Like.data[2]);
-		} while (!svd.isPerformed(Like));		
-		System.out.println("final  " + Like.data[0] + "  " + Like.data[1]+ "  " + Like.data[2]);
-		*/
-        /*Double[] a = {1.1, 2.2, 3.3, 4.4};
-
-        while (a[0] + a[1] + a[2] + a[3] < 100.0) {
-            int remain = 4;
-            while (commu.slaveNum() != slaveNum) {System.out.print(commu.slaveNum());}
-            System.out.println("\n");
-
-            for (int i = 1; i <= slaveNum; i++) {
-            	CommonPacket packet = new CommonPacket(-1,a[i - 1]);
-            	System.out.println("before send packet");
-                commu.sendPacket(i, packet);
-                System.out.println("after send packet");
-            }
-
-            while (remain > 0) {
-                synchronized (commu.msgs) {
-                    if (commu.msgs.size() > 0) {
-                        System.out.println(commu.msgs.peek().para);
-                        a[commu.msgs.peek().fromId - 1] = commu.msgs.peek().para;
-                        commu.msgs.remove();
-                        remain--;
-                    }
-                }
-            }
-
-            double sum = a[0] + a[1] + a[2] + a[3];*/
-        //System.out.println("sum :" + sum);
-
+*/
     public static void printArray(double[] arr) {
         for (double i : arr)
             System.out.print(i + " ");
         System.out.println();
     }
+
     private String dispArray(double[] arr){
         String s = "";
         for(double i: arr)
