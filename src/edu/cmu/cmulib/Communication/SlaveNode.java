@@ -21,12 +21,14 @@ public class SlaveNode {
 
     public void connect() {
         try {
-            socket = new Socket(this.masterAddress, this.masterPort);
+            socket = new Socket();
+            socket.connect(new InetSocketAddress(this.masterAddress, this.masterPort), 0);
             oos = new ObjectOutputStream(socket.getOutputStream());
             ois = new ObjectInputStream(new BufferedInputStream(socket.getInputStream()));
             new Thread(new SlaveService(ois)).start();
         }catch (Exception ex) {
-            System.out.println("Could not find!");
+            //System.out.println("Could not find!");
+            this.connect();
         }
     }
 

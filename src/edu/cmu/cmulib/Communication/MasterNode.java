@@ -29,20 +29,8 @@ public class MasterNode {
         midd = nmidd;
     }
 
-/*
-    public MasterNode(Callback aMiddleWare) throws IOException {
-        System.out.println("I'm a MasterNode!");
-        slaveMap = new HashMap<Integer, SlaveData>();
-        serverSocket = new ServerSocket(port);
-        executorService = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors() * POOL_SIZE);
-        this.middleWare = aMiddleWare;
-    }
-*/
-
-
     public void startListen () throws IOException {
         new Thread(new ServerService()).start();
-        System.out.println("why!!!!??????!");
     }
 
     public void sendObject(int id, CommonPacket packet){
@@ -111,19 +99,24 @@ public class MasterNode {
             }
         }
 
-        private void handleSocket() throws Exception {
+        private void handleSocket() throws IOException {
             String temp="";
             SlaveData aSlave = new SlaveData(ois, oos);
             aSlave.id = slaveId++;
             synchronized(slaveMap){
                 slaveMap.put(aSlave.id,aSlave);
             }
-            //System.out.println("Slaveid: " + slaveMap.size());
+
             while(true){
-            	CommonPacket packet = (CommonPacket) ois.readObject();
-                midd.msgReceived(aSlave.id,packet );
-                 //  middleWare.salveReturn();
-                //System.out.println(temp);
+                CommonPacket packet = null;
+                try {
+                    packet = (CommonPacket) ois.readObject();
+                } catch (IOException e) {
+                    break;
+                } catch (ClassNotFoundException e) {
+                    e.printStackTrace();
+                }
+                midd.msgReceived(aSlave.id,packet);
                 if(temp.equals("eof")){
                     System.out.println("it is eof");
                     break;
@@ -132,7 +125,9 @@ public class MasterNode {
             oos.close();
             ois.close();
             socket.close();
-            System.out.println("HHHHHHHHHHHHHHHHHHH");
+            synchronized(slaveMap){
+                slaveMap.remove(aSlave.id);
+            }
         }
 
     }

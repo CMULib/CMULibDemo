@@ -42,6 +42,28 @@ public class JsonParser {
         return conf;
     }
 
+    public ConfParameter parseString(String para) throws ParseException {
+        ConfParameter conf = new ConfParameter();
+        JSONParser jsonParser = new JSONParser();
+        JSONObject jsonObject = (JSONObject) jsonParser.parse(para);
+
+        conf.masterAddress = (String) jsonObject.get("masterAddress");
+        conf.masterPort = ((Long) jsonObject.get("masterPort")).intValue();
+        conf.minSlaveNum = ((Long) jsonObject.get("minSlaveNum")).intValue();
+        conf.fileDir = (String) jsonObject.get("fileDir");
+        conf.fileName = (String) jsonObject.get("fileName");
+
+        String fs = (String) jsonObject.get("fsType");
+        // In order to support jdk 1.6, use if-else instead of switch (String).
+        if (fs.toLowerCase().equals("tachyon")) {
+            conf.fsType = FileSystemType.TACHYON;
+        } else if (fs.toLowerCase().equals("local")) {
+            conf.fsType = FileSystemType.LOCAL;
+        }
+
+        return conf;
+    }
+
     public static void main(String[] argv) throws IOException, ParseException {
         String filename = "./resource/conf.json";
 

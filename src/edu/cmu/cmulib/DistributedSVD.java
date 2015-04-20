@@ -15,35 +15,33 @@ import java.util.LinkedList;
  * Created by handixu on 4/18/15.
  */
 public class DistributedSVD implements Runnable {
-    MasterMiddleWare commu ;
+    MasterMiddleWare commu;
     double[] test;
     int slaveNum;
     LinkedList<Double[]> mList = new LinkedList<Double[]>();
+    String output;
+    boolean isFinished;
+
     public DistributedSVD(MasterMiddleWare middleWare, int slaveNum, double[] test) {
         commu = middleWare;
         this.test = test;
         this.slaveNum = slaveNum;
         commu.register(Double[].class, mList);
+        this.output = "";
+        this.isFinished = false;
     }
 
     @Override
     public void run() {
         //double[] test = new double[1000 * 1000];
         int q = 0;
-
+        output = "";
 
         int rows = 1000;
         int cols = 1000;
         Mat score = new Mat(rows, cols, test);
         Tag tag;
         Mat Like, slaveL;
-
-
-
-
-
-
-
 
         Master_Spliter split = new Master_Spliter(score, slaveNum);
         Master_SVD svd = new Master_SVD(score, slaveNum);
@@ -53,12 +51,13 @@ public class DistributedSVD implements Runnable {
         }
         Like = svd.initL();
         slaveL = null;
+        isFinished = false;
 
         // compute the first eigenvector iterately
         do {
             int remain = slaveNum;
             svd.setL(Like);
-            printArray(Like.data);
+            //output += printArray(Like.data);
             // send L
             for (int i = 1; i <= slaveNum; i++) {
                 sendMat(Like, i, commu);
@@ -85,13 +84,25 @@ public class DistributedSVD implements Runnable {
             MatOp.vectorNormalize(Like, MatOp.NormType.NORM_L2);
         } while (!svd.isPerformed(Like));     //termination of iteration
         System.out.println("final  ");
-        printArray(Like.data);
+        output += "final  ";
+        output += printArray(Like.data);
+        System.out.println(output);
+        isFinished = true;
     }
 
-    public static void printArray(double[] arr) {
-        for (double i : arr)
-            System.out.print(i + " ");
-        System.out.println();
+    public String getOutput() {
+        return this.output;
+    }
+
+    public static String printArray(double[] arr) {
+        String ret = "";
+        for (double i : arr) {
+            //System.out.print(i + " ");
+            ret += i + " ";
+        }
+        //System.out.println();
+        ret += "\n";
+        return ret;
     }
 
     public static Mat getMat(LinkedList<Double[]> mList) {

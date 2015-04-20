@@ -15,11 +15,13 @@ public class DemoMaster {
         Master master = new Master(conf);
         master.init();
 
-        do {
-            String str = master.execute();
-            System.out.println(str);
-        } while(!master.isCompleted());
-        String finalRst = master.dispFinal();
-        System.out.println(finalRst);
+        while (true) {
+            System.out.print("O");
+            if (master.commu.slaveNum() >= conf.minSlaveNum)
+                break;
+        }
+
+        String str = master.execute();
+        System.out.println(str);
     }
 }

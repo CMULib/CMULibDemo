@@ -26,13 +26,14 @@ public class Master {
     private Mat Like;
     private Master_Spliter split;
     private Master_SVD svd;
-    private MasterMiddleWare commu;
+    public MasterMiddleWare commu;
     private LinkedList<Double[]> mList;
     public int slaveNum;
     public String dir;
     public String fileName;
     public int port;
     public FileSystemType mFsType;
+    public double[] test;
 
     public Master() {
         this.slaveNum = 4;
@@ -61,74 +62,69 @@ public class Master {
         this.mFsType = conf.fsType;
     }
 
+    public int getCurSlaveNum() {
+        return commu.slaveNum();
+    }
+
+    public void setPara(String para) throws ParseException {
+        JsonParser jp = new JsonParser();
+        ConfParameter conf = jp.parseString(para);
+
+        this.slaveNum = conf.minSlaveNum;
+        this.dir = conf.fileDir;
+        this.fileName = conf.fileName;
+        this.port = conf.masterPort;
+        this.mFsType = conf.fsType;
+    }
+
     public String sayHi() {
         return "HHHHHHHHHHHHHH";
     }
 
-    public void init() throws IOException {
-        double[] test = new double[1000*1000];
-        mList = new LinkedList<Double[]>();
+    public String init() throws IOException {
+        test = new double[1000 * 1000];
+        LinkedList<Double[]> mList = new LinkedList<Double[]>();
+
+        //String dir = "tachyon://localhost:19998";
+        //String fileName = "/BinData";
+        String dir = "./resource";
+        String fileName = "/BinData";
         try {
-            FileSystemInitializer fs = FileSystemAdaptorFactory.BuildFileSystemAdaptor(mFsType, dir);
-            DataHandler t = DataHandlerFactory.BuildDataHandler(mFsType);
+            FileSystemInitializer fs = FileSystemAdaptorFactory.BuildFileSystemAdaptor(FileSystemType.LOCAL, dir);
+            DataHandler t = DataHandlerFactory.BuildDataHandler(FileSystemType.LOCAL);
             test = t.getDataInDouble(fs.getFsHandler(), fileName, 1000 * 1000);
             System.out.println(test[1000 * 1000 - 1]);
         } catch (IOException e) {
         }
 
-        // initialize original matrix
-        int rows = 1000;
-        int cols = 1000;
-        this.score = new Mat(rows, cols ,test);
-
-        commu = new MasterMiddleWare(port);
-        commu.register(Double[].class, mList);
+        this.commu = new MasterMiddleWare(this.port);
         commu.startMaster();
 
-        this.split = new Master_Spliter(score, slaveNum);
-        this.svd = new Master_SVD(score, slaveNum);
-        this.Like = svd.initL();
-        while(commu.slaveNum()<slaveNum){System.out.println(commu.slaveNum());}
+        return "success!";
     }
 
     public String execute() {
-        Tag tag;
-        Mat slaveL = null;
-        // compute the first eigenvector iterately
-        int remain = slaveNum;
-        svd.setL(Like);
-        String output = dispArray(Like.data);   // information need to show
-        // send L
-        for (int i = 1; i <= slaveNum; i++){
-            sendMat(Like,i,commu);
-        }
-        //send Tag
-        ArrayList<Tag> index = split.split();
-        for(int i = 0; i < index.size(); i++) {
-            tag = index.get(i);
-            CommonPacket packet = new CommonPacket(-1,tag);
-            commu.sendPacket(i+1, packet);
-        }
-        // receive L and update
-        while (remain > 0) {
-            synchronized (mList) {
-                if (mList.size() > 0) {
-                    slaveL = getMat(mList);
-                    svd.update_SVD(slaveL);
-                    remain--;
-                }
-            }
+        String output = "";
+        if (commu.slaveNum() < this.slaveNum) {
+            return "Not enoght slaves";
         }
 
-        this.Like = svd.getUpdateL();
-        MatOp.vectorNormalize(this.Like, MatOp.NormType.NORM_L2);
+        DistributedSVD svd_t = new DistributedSVD(commu,this.slaveNum,test);
+        Thread t = new Thread(svd_t);
+        t.run();
+
+        while (true) {
+            if (svd_t.isFinished)
+                break;
+        }
+        output = svd_t.getOutput();
         return output;
     }
 
     public boolean isCompleted() {
         return svd.isPerformed(Like);
-        //return svd.isPerformed();
     }
+
     public String dispFinal() {
         String finalout = "final  " + dispArray(this.Like.data);   // final information
         return finalout;
@@ -137,7 +133,6 @@ public class Master {
     public static void main(String[] args) throws IOException, InterruptedException {
         // 4 slaves assumed
         double[] test = new double[1000 * 1000];
-        int q = 0;
         int slaveNum = 4;
         LinkedList<Double[]> mList = new LinkedList<Double[]>();
 
@@ -154,15 +149,12 @@ public class Master {
         }
 
 
-        int port = Integer.parseInt(args[0]);
-
+        int port = 8888;
         MasterMiddleWare commu = new MasterMiddleWare(port);
-
         DistributedSVD svd = new DistributedSVD(commu,slaveNum,test);
 
         commu.startMaster();
         BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
-
 
         while (true) {
             String line = br.readLine();
@@ -173,8 +165,6 @@ public class Master {
                 t.start();
             }
         }
-
-
     }
 
     public static void printArray(double[] arr) {
