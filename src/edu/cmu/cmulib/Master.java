@@ -1,5 +1,8 @@
 package edu.cmu.cmulib;
 
+import java.io.BufferedReader;
+import java.io.FileReader;
+import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.LinkedList;
 
@@ -32,9 +35,9 @@ public class Master {
     public FileSystemType mFsType;
 
     public Master() {
-        this.slaveNum = 1;
-        this.dir = "";
-        this.fileName = "";
+        this.slaveNum = 4;
+        this.dir = "./resource";
+        this.fileName = "/BinData";
         this.port = 8888;
         this.mFsType = FileSystemType.LOCAL;
     }
@@ -130,12 +133,12 @@ public class Master {
         String finalout = "final  " + dispArray(this.Like.data);   // final information
         return finalout;
     }
-/*
+
     public static void main(String[] args) throws IOException, InterruptedException {
         // 4 slaves assumed
         double[] test = new double[1000 * 1000];
         int q = 0;
-        int slaveNum = 1;
+        int slaveNum = 4;
         LinkedList<Double[]> mList = new LinkedList<Double[]>();
 
         //String dir = "tachyon://localhost:19998";
@@ -150,61 +153,30 @@ public class Master {
         } catch (IOException e) {
         }
 
-        int rows = 1000;
-        int cols = 1000;
-        Mat score = new Mat(rows, cols, test);
-        Tag tag;
-        Mat Like, slaveL;
 
         int port = Integer.parseInt(args[0]);
 
         MasterMiddleWare commu = new MasterMiddleWare(port);
-        commu.register(Double[].class, mList);
+
+        DistributedSVD svd = new DistributedSVD(commu,slaveNum,test);
+
         commu.startMaster();
+        BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
 
 
-        Master_Spliter split = new Master_Spliter(score, slaveNum);
-        Master_SVD svd = new Master_SVD(score, slaveNum);
-        while (commu.slaveNum() < slaveNum) {
-            System.out.println(commu.slaveNum());
+        while (true) {
+            String line = br.readLine();
+            if(line.startsWith("show")){
+                System.out.println("Current Connected Slave : "+ commu.slaveNum());
+            }else if(line.startsWith("start")){
+                Thread t = new Thread(svd);
+                t.start();
+            }
         }
-        Like = svd.initL();
-        slaveL = null;
 
-        // compute the first eigenvector iterately
-        do {
-            int remain = slaveNum;
-            svd.setL(Like);
-            printArray(Like.data);
-            // send L
-            for (int i = 1; i <= slaveNum; i++) {
-                sendMat(Like, i, commu);
-            }
-            //send Tag
-            ArrayList<Tag> index = split.split();
-            for (int i = 0; i < index.size(); i++) {
-                tag = index.get(i);
-                CommonPacket packet = new CommonPacket(-1, tag);
-                commu.sendPacket(i + 1, packet);
-            }
-            // receive L and update
-            while (remain > 0) {
-                synchronized (mList) {
-                    if (mList.size() > 0) {
-                        slaveL = getMat(mList);
-                        svd.update_SVD(slaveL);
-                        remain--;
-                    }
-                }
-            }
 
-            Like = svd.getUpdateL();
-            MatOp.vectorNormalize(Like, MatOp.NormType.NORM_L2);
-        } while (!svd.isPerformed(Like));     //termination of iteration
-        System.out.println("final  ");
-        printArray(Like.data);
     }
-*/
+
     public static void printArray(double[] arr) {
         for (double i : arr)
             System.out.print(i + " ");
@@ -219,6 +191,7 @@ public class Master {
         return s;
     }
 
+
     public static Mat getMat(LinkedList<Double[]> mList) {
         Double[] temp = mList.peek();
         double row = temp[0];
@@ -230,9 +203,7 @@ public class Master {
         Mat mat = new Mat((int) row, (int) col, arr);
         mList.remove();
         return mat;
-
     }
-
 
     public static void sendMat(Mat mat, int id, MasterMiddleWare m) {
         Double[] array = new Double[mat.data.length + 2];
@@ -244,7 +215,5 @@ public class Master {
         CommonPacket packet = new CommonPacket(-1, array);
 
         m.sendPacket(id, packet);
-
     }
-
 }

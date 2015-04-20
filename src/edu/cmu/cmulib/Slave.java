@@ -94,7 +94,7 @@ public class Slave {
             }
         }
     }
-	/*
+
 	public static void main (String[] args) throws IOException {
         
         // initialize original matrix
@@ -158,7 +158,7 @@ public class Slave {
             }
         }
 	}
-	*/
+
 	
 	public static Mat getMat(LinkedList<Double[]> mList){
 		Double [] temp = mList.peek();

@@ -15,17 +15,23 @@ import java.util.LinkedList;
  * Created by handixu on 4/18/15.
  */
 public class DistributedSVD implements Runnable {
-    int port;
-    public DistributedSVD(String port) {
-        this.port = Integer.parseInt(port);
+    MasterMiddleWare commu ;
+    double[] test;
+    int slaveNum;
+    LinkedList<Double[]> mList = new LinkedList<Double[]>();
+    public DistributedSVD(MasterMiddleWare middleWare, int slaveNum, double[] test) {
+        commu = middleWare;
+        this.test = test;
+        this.slaveNum = slaveNum;
+        commu.register(Double[].class, mList);
     }
 
     @Override
     public void run() {
-        double[] test = new double[1000 * 1000];
+        //double[] test = new double[1000 * 1000];
         int q = 0;
-        int slaveNum = 1;
-        LinkedList<Double[]> mList = new LinkedList<Double[]>();
+
+
         int rows = 1000;
         int cols = 1000;
         Mat score = new Mat(rows, cols, test);
@@ -34,15 +40,16 @@ public class DistributedSVD implements Runnable {
 
 
 
-        MasterMiddleWare commu = new MasterMiddleWare(port);
-        commu.register(Double[].class, mList);
-        commu.startMaster();
+
+
+
 
 
         Master_Spliter split = new Master_Spliter(score, slaveNum);
         Master_SVD svd = new Master_SVD(score, slaveNum);
         if(commu.slaveNum() < slaveNum) {
             System.out.println(commu.slaveNum()+ " is less than required number");
+            System.exit(1);
         }
         Like = svd.initL();
         slaveL = null;
