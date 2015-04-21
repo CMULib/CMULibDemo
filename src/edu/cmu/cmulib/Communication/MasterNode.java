@@ -44,7 +44,9 @@ public class MasterNode {
         new Thread(new ServerService()).start();
         System.out.println("why!!!!??????!");
     }
-
+    public void close () throws IOException {
+        serverSocket.close();
+    }
     public void sendObject(int id, CommonPacket packet){
         SlaveData aSlaveData = slaveMap.get(id);
         try {

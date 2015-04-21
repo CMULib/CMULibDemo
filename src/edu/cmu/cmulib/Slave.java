@@ -1,16 +1,16 @@
 package edu.cmu.cmulib;
 
+import edu.cmu.cmulib.Communication.CommonPacket;
 import edu.cmu.cmulib.CoolMatrixUtility.core.Mat;
 import edu.cmu.cmulib.CoolMatrixUtility.decomp.svd.Slave_SVD;
 import edu.cmu.cmulib.CoolMatrixUtility.decomp.svd.Slave_getSplitedMatrix;
 import edu.cmu.cmulib.CoolMatrixUtility.help.Tag;
+import edu.cmu.cmulib.FileSystemAdaptor.*;
+import edu.cmu.cmulib.Utils.ConfParameter;
+import edu.cmu.cmulib.Utils.KSVDconstant;
 
 import java.io.IOException;
 import java.util.LinkedList;
-
-import edu.cmu.cmulib.FileSystemAdaptor.*;
-import edu.cmu.cmulib.Communication.CommonPacket;
-import edu.cmu.cmulib.Utils.ConfParameter;
 
 public class Slave {
 	public int SlaveId;
@@ -43,10 +43,13 @@ public class Slave {
 	}
 
     public void init() throws IOException {
-        double[] test = new double[1000*1000];
-        int rows = 1000;
-        int cols = 1000;
 
+        int rows = KSVDconstant.rows;
+        int cols = KSVDconstant.cols;
+        double[] test = new double[rows * cols];
+//        double[] test = new double[8*4];
+//        int rows = 8;
+//        int cols = 4;
         try {
             FileSystemInitializer fs = FileSystemAdaptorFactory.BuildFileSystemAdaptor(FileSystemType.LOCAL, dir);
             DataHandler t = DataHandlerFactory.BuildDataHandler(FileSystemType.LOCAL);
@@ -98,9 +101,13 @@ public class Slave {
 	public static void main (String[] args) throws IOException {
         
         // initialize original matrix
-        double[] test = new double[1000*1000];
-		int rows = 1000;
-		int cols = 1000;
+//        double[] test = new double[1000*1000];
+//		int rows = 1000;
+//		int cols = 1000;
+
+        int rows = KSVDconstant.rows;
+        int cols = KSVDconstant.cols;
+        double[] test = new double[rows*cols];
         String address = args[0];
         int port = Integer.parseInt(args[1]);
         int q = 0;
@@ -109,12 +116,15 @@ public class Slave {
         //String fileName = "/BinData";
         String dir = "./resource";
         String fileName = "/BinData";
-
+        DataHandler t = null;
+        FileSystemInitializer fs = null;
         try {
-            FileSystemInitializer fs = FileSystemAdaptorFactory.BuildFileSystemAdaptor(FileSystemType.LOCAL, dir);
-            DataHandler t = DataHandlerFactory.BuildDataHandler(FileSystemType.LOCAL);
-            test = t.getDataInDouble(fs.getFsHandler(), fileName, 1000 * 1000);
-            System.out.println(test[1000*1000-1]);
+            fs = FileSystemAdaptorFactory.BuildFileSystemAdaptor(FileSystemType.LOCAL, dir);
+            t = DataHandlerFactory.BuildDataHandler(FileSystemType.LOCAL);
+//            test = t.getDataInDouble(fs.getFsHandler(), fileName, 1000 * 1000);
+//            System.out.println(test[1000*1000-1]);
+            test = t.getDataInDouble(fs.getFsHandler(), fileName, rows * cols);
+            System.out.println(test[rows * cols - 1]);
         } catch (IOException e) {
         }
     
@@ -139,13 +149,22 @@ public class Slave {
             //receive tag and compute L
             synchronized (tagList) {
                 if (tagList.size() > 0) {
-                    split.setTag(tagList.peek());
-                    tagList.remove();
-                    S = split.construct();
-                    L = svd.Slave_UpdateL(S);
-                    printArray(L.data);
-                    sendMat(L,sdSlave);
-
+                    Tag tag = tagList.peek();
+                    if (tag.getBegin() == -1 && tag.getEnd() == -1){
+                        test = t.getDataInDouble(fs.getFsHandler(), fileName, rows * cols);
+                        score = new Mat(rows, cols ,test);
+                        split = new Slave_getSplitedMatrix(score);
+                        tagList.remove();
+                        System.err.println(test[rows * cols - 1]);
+                        continue;                   // there will be a mistake if continue is removed
+                    }else {
+                        split.setTag(tag);
+                        tagList.remove();
+                        S = split.construct();
+                        L = svd.Slave_UpdateL(S);
+                        printArray(L.data);
+                        sendMat(L, sdSlave);
+                    }
                 }
             }
             //receive L

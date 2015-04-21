@@ -1,25 +1,21 @@
 package edu.cmu.cmulib;
 
-import java.io.BufferedReader;
-import java.io.FileReader;
-import java.io.InputStreamReader;
-import java.util.ArrayList;
-import java.util.LinkedList;
-
+import edu.cmu.cmulib.Communication.CommonPacket;
 import edu.cmu.cmulib.CoolMatrixUtility.core.Mat;
 import edu.cmu.cmulib.CoolMatrixUtility.core.MatOp;
 import edu.cmu.cmulib.CoolMatrixUtility.decomp.svd.Master_SVD;
 import edu.cmu.cmulib.CoolMatrixUtility.decomp.svd.Master_Spliter;
 import edu.cmu.cmulib.CoolMatrixUtility.help.Tag;
-import edu.cmu.cmulib.Utils.ConfParameter;
-
-import java.io.IOException;
-
 import edu.cmu.cmulib.FileSystemAdaptor.*;
-
-import edu.cmu.cmulib.Communication.CommonPacket;
+import edu.cmu.cmulib.Utils.ConfParameter;
 import edu.cmu.cmulib.Utils.JsonParser;
 import org.json.simple.parser.ParseException;
+
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.util.ArrayList;
+import java.util.LinkedList;
 
 public class Master {
     private Mat score;
@@ -66,19 +62,24 @@ public class Master {
     }
 
     public void init() throws IOException {
-        double[] test = new double[1000*1000];
+        //double[] test = new double[1000*1000];
+        double[] test = new double[8*4];
         mList = new LinkedList<Double[]>();
         try {
             FileSystemInitializer fs = FileSystemAdaptorFactory.BuildFileSystemAdaptor(mFsType, dir);
             DataHandler t = DataHandlerFactory.BuildDataHandler(mFsType);
-            test = t.getDataInDouble(fs.getFsHandler(), fileName, 1000 * 1000);
-            System.out.println(test[1000 * 1000 - 1]);
+            //test = t.getDataInDouble(fs.getFsHandler(), fileName, 1000 * 1000);
+            test = t.getDataInDouble(fs.getFsHandler(), fileName, 8 * 4);
+            //System.out.println(test[1000 * 1000 - 1]);
+            System.out.println(test[8*4 - 1]);
         } catch (IOException e) {
         }
 
         // initialize original matrix
-        int rows = 1000;
-        int cols = 1000;
+//        int rows = 1000;
+//        int cols = 1000;
+        int rows = 8;
+        int cols = 4;
         this.score = new Mat(rows, cols ,test);
 
         commu = new MasterMiddleWare(port);
@@ -136,44 +137,52 @@ public class Master {
 
     public static void main(String[] args) throws IOException, InterruptedException {
         // 4 slaves assumed
-        double[] test = new double[1000 * 1000];
+        //double[] test = new double[1000 * 1000];
+        double[] test = new double[8 * 4];
         int q = 0;
-        int slaveNum = 4;
+        int slaveNum = 2;
         LinkedList<Double[]> mList = new LinkedList<Double[]>();
 
         //String dir = "tachyon://localhost:19998";
         //String fileName = "/BinData";
         String dir = "./resource";
         String fileName = "/BinData";
-        try {
-            FileSystemInitializer fs = FileSystemAdaptorFactory.BuildFileSystemAdaptor(FileSystemType.LOCAL, dir);
-            DataHandler t = DataHandlerFactory.BuildDataHandler(FileSystemType.LOCAL);
-            test = t.getDataInDouble(fs.getFsHandler(), fileName, 1000 * 1000);
-            System.out.println(test[1000 * 1000 - 1]);
-        } catch (IOException e) {
-        }
-
-
         int port = Integer.parseInt(args[0]);
-
         MasterMiddleWare commu = new MasterMiddleWare(port);
-
-        DistributedSVD svd = new DistributedSVD(commu,slaveNum,test);
-
+        DistributedSVD svd = new DistributedSVD(commu, slaveNum, test);
         commu.startMaster();
-        BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+        int K = 3;
+        while(K > 0) {
 
-
-        while (true) {
-            String line = br.readLine();
-            if(line.startsWith("show")){
-                System.out.println("Current Connected Slave : "+ commu.slaveNum());
-            }else if(line.startsWith("start")){
-                Thread t = new Thread(svd);
-                t.start();
+            try {
+                FileSystemInitializer fs = FileSystemAdaptorFactory.BuildFileSystemAdaptor(FileSystemType.LOCAL, dir);
+                DataHandler t = DataHandlerFactory.BuildDataHandler(FileSystemType.LOCAL);
+//            test = t.getDataInDouble(fs.getFsHandler(), fileName, 1000 * 1000);
+//            System.out.println(test[1000 * 1000 - 1]);
+                test = t.getDataInDouble(fs.getFsHandler(), fileName, 8 * 4);
+                System.out.println(test[8 * 4 - 1]);
+            } catch (IOException e) {
             }
-        }
 
+
+
+            BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+
+            while (true) {
+                String line = br.readLine();
+                if (line.startsWith("show")) {
+                    System.out.println("Current Connected Slave : " + commu.slaveNum());
+                } else if (line.startsWith("start")) {
+                    Thread t = new Thread(svd);
+                    t.start();
+                } else {
+                    break;
+                }
+
+            }
+            K--;
+
+        }
 
     }
 

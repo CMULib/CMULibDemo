@@ -1,8 +1,5 @@
 package edu.cmu.cmulib.FileSystemAdaptor;
 
-import tachyon.client.FileInStream;
-import tachyon.client.ReadType;
-
 import java.io.*;
 
 /**
@@ -33,7 +30,21 @@ public class LocalDataHandler implements DataHandler<String> {
         while (ptr < num) {
             data[ptr++] = di.readDouble();
         }
-
+        di.close();
         return data;
+    }
+
+    public DataOutputStream getDataOutputStream(String fileSystem, String filePath) throws IOException{
+        File file = new File(fileSystem + filePath);
+        FileOutputStream out = new FileOutputStream(file);
+        return new DataOutputStream(out);
+    }
+    public boolean writeDataOutDouble(String fileSystem, String filePath, double[] matrix) throws IOException{
+        DataOutputStream di = this.getDataOutputStream(fileSystem, filePath);
+        for (int i = 0; i < matrix.length; i++){
+            di.writeDouble(matrix[i]);
+        }
+        di.close();
+        return true;
     }
 }

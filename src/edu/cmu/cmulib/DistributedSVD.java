@@ -6,6 +6,8 @@ import edu.cmu.cmulib.CoolMatrixUtility.core.MatOp;
 import edu.cmu.cmulib.CoolMatrixUtility.decomp.svd.Master_SVD;
 import edu.cmu.cmulib.CoolMatrixUtility.decomp.svd.Master_Spliter;
 import edu.cmu.cmulib.CoolMatrixUtility.help.Tag;
+import edu.cmu.cmulib.FileSystemAdaptor.*;
+import edu.cmu.cmulib.Utils.KSVDconstant;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -32,19 +34,13 @@ public class DistributedSVD implements Runnable {
         int q = 0;
 
 
-        int rows = 1000;
-        int cols = 1000;
+//        int rows = 1000;
+//        int cols = 1000;
+        int rows = KSVDconstant.rows;
+        int cols = KSVDconstant.cols;
         Mat score = new Mat(rows, cols, test);
         Tag tag;
         Mat Like, slaveL;
-
-
-
-
-
-
-
-
         Master_Spliter split = new Master_Spliter(score, slaveNum);
         Master_SVD svd = new Master_SVD(score, slaveNum);
         if(commu.slaveNum() < slaveNum) {
@@ -84,8 +80,26 @@ public class DistributedSVD implements Runnable {
             Like = svd.getUpdateL();
             MatOp.vectorNormalize(Like, MatOp.NormType.NORM_L2);
         } while (!svd.isPerformed(Like));     //termination of iteration
+
+        Mat newS = MatOp.gemm(Like, MatOp.gemm(Like.t(), score));
+        score = MatOp.scaleAdd(score, -1, newS);
+        DataHandler t = null;
+        String dir = "./resource";
+        String fileName = "/BinData";
+        try {
+            FileSystemInitializer fs = FileSystemAdaptorFactory.BuildFileSystemAdaptor(FileSystemType.LOCAL, dir);
+            t = DataHandlerFactory.BuildDataHandler(FileSystemType.LOCAL);
+            t.writeDataOutDouble(fs.getFsHandler(), fileName, score.data);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
         System.out.println("final  ");
         printArray(Like.data);
+        System.out.println("**********");
+        CommonPacket packet = new CommonPacket(-1, new Tag(-1,-1));
+        for (int i = 1; i <= slaveNum; i++) {
+            commu.sendPacket(i, packet);
+        }
     }
 
     public static void printArray(double[] arr) {

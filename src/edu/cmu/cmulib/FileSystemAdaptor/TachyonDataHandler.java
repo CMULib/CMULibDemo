@@ -6,9 +6,7 @@ import tachyon.client.ReadType;
 import tachyon.client.TachyonFS;
 import tachyon.client.TachyonFile;
 
-import java.io.DataInputStream;
-import java.io.EOFException;
-import java.io.IOException;
+import java.io.*;
 
 /**
  * Created by yiranfei on 4/9/15.
@@ -42,5 +40,16 @@ public class TachyonDataHandler implements DataHandler<TachyonFS> {
 
         return data;
     }
+
+    @Override
+    public DataOutputStream getDataOutputStream(TachyonFS fileSystem, String filePath) throws IOException {
+        return null;
+    }
+
+    @Override
+    public boolean writeDataOutDouble(TachyonFS fileSystem, String filePath, double[] matrix) throws IOException {
+        return false;
+    }
+
 }
 

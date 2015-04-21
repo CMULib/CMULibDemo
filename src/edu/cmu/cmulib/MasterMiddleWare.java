@@ -49,9 +49,15 @@ public class MasterMiddleWare implements MiddleWare {
         try {
             masterNode = new MasterNode(port, this);
             masterNode.startListen();
+
+
         }catch (IOException e){
             System.out.println("Failed to start Master");
         }
+    }
+
+    public void closeMaster() throws IOException {
+        masterNode.close();
     }
 /*
     public void sendMatrix(int slaveId, DummyMatrix matrix){
