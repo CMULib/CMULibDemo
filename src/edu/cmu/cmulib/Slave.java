@@ -2,6 +2,7 @@ package edu.cmu.cmulib;
 
 import edu.cmu.cmulib.CoolMatrixUtility.core.Mat;
 import edu.cmu.cmulib.CoolMatrixUtility.decomp.svd.Slave_SVD;
+import edu.cmu.cmulib.CoolMatrixUtility.decomp.svd.Slave_kSVD;
 import edu.cmu.cmulib.CoolMatrixUtility.decomp.svd.Slave_getSplitedMatrix;
 import edu.cmu.cmulib.CoolMatrixUtility.help.Tag;
 
@@ -27,7 +28,7 @@ public class Slave {
     Mat L = null;
     SlaveMiddleWare sdSlave = null;
     Slave_getSplitedMatrix split = null;
-    Slave_SVD svd = null;
+    Slave_kSVD svd = null;
 
     public Slave(ConfParameter conf) {
         this.address = conf.masterAddress;
@@ -67,7 +68,7 @@ public class Slave {
         sdSlave.startSlave();
 
         split = new Slave_getSplitedMatrix(score);
-        svd = new Slave_SVD();
+        svd = new Slave_kSVD(2);
     }
 
     public void execute() {

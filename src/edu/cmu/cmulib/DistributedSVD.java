@@ -4,6 +4,7 @@ import edu.cmu.cmulib.Communication.CommonPacket;
 import edu.cmu.cmulib.CoolMatrixUtility.core.Mat;
 import edu.cmu.cmulib.CoolMatrixUtility.core.MatOp;
 import edu.cmu.cmulib.CoolMatrixUtility.decomp.svd.Master_SVD;
+import edu.cmu.cmulib.CoolMatrixUtility.decomp.svd.Master_kSVD;
 import edu.cmu.cmulib.CoolMatrixUtility.decomp.svd.Master_Spliter;
 import edu.cmu.cmulib.CoolMatrixUtility.help.Tag;
 
@@ -44,7 +45,7 @@ public class DistributedSVD implements Runnable {
         Mat Like, slaveL;
 
         Master_Spliter split = new Master_Spliter(score, slaveNum);
-        Master_SVD svd = new Master_SVD(score, slaveNum);
+        Master_kSVD svd = new Master_kSVD(score, slaveNum, 2);
         if(commu.slaveNum() < slaveNum) {
             System.out.println(commu.slaveNum()+ " is less than required number");
             System.exit(1);

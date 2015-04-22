@@ -38,7 +38,7 @@ public class Master_kSVD {
         Mat initL = new Mat(src.rows, k);
         for (int j = 0; j < k; j++) {
             for (int i = 0; i < src.rows; i++) {
-                initL.data[k * src.rows + i] = Math.random();
+                initL.data[j * src.rows + i] = Math.random();
             }
         }
         MatOp.vectorNormalize(initL, MatOp.NormType.NORM_L2);
