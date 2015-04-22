@@ -185,6 +185,13 @@ public class Mat {
 		return result;
 	}
 
+    public Mat setCols(int start, int end, Mat o) {
+        assert(start >=0 && end < this.cols && end - start + 1 == o.cols && this.rows == o.rows);
+        for (int m = 0; m < (end - start + 1) * this.rows; m++) {
+            this.data[start*this.rows + m] = o.data[m];
+        }
+        return this;
+    }
 	/**
 	 * Performs an element-wise multiplication or division.
 	 * 
