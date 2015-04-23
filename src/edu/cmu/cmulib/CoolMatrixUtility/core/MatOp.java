@@ -111,6 +111,23 @@ public class MatOp {
 		return src1;
 	}
 
+    /**
+     * Calculate the difference of two matrices
+     */
+    public static Mat diff(Mat src1, Mat src2) {
+        if (src1.isEmpty()) {
+            return src2.mul(-1.0);
+        }
+        if (src2.isEmpty()) {
+            return src1;
+        }
+        assert (src1.rows == src2.rows && src1.cols == src2.cols);
+        for (int i = 0; i < src1.data.length; i++) {
+            src1.data[i] = src1.data[i] - src2.data[i];
+        }
+        return src1;
+    }
+
 	/**
 	 * Enumerate supported norm operation type
 	 */
@@ -163,10 +180,23 @@ public class MatOp {
 	 * normalize vector
 	 */
 	
-	public static Mat vectorNormalize(Mat src, NormType normType){
+	public static Mat vectorNormalize(Mat src, NormType normType) {
 		double sum = norm(src, normType);
 		return src.mul(1.0/sum);
 	}
+
+    /**
+     * normalize matrix by column
+     */
+    public static Mat matNormalize(Mat src, NormType normType) {
+        for (int j = 0; j < src.cols; j++) {
+            Mat temp = src.colRange(j, j);
+            double sum = norm(temp, normType);
+            src.setCols(j, j, temp.mul(1.0/sum));
+        }
+        return src;
+    }
+
 	/**
 	 * Calculate distance between two vectors.
 	 * For matrix, this is equal to square root of SSE (Sum of Squared Error)

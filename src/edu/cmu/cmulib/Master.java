@@ -106,10 +106,10 @@ public class Master {
     public String execute() {
         String output = "";
         if (commu.slaveNum() < this.slaveNum) {
-            return "Not enoght slaves";
+            return "Not enough slaves";
         }
 
-        DistributedSVD svd_t = new DistributedSVD(commu,this.slaveNum,test);
+        DistributedSVD svd_t = new DistributedSVD(commu,this.slaveNum,test, 1000, 1000);
         Thread t = new Thread(svd_t);
         t.run();
 
@@ -132,26 +132,29 @@ public class Master {
 
     public static void main(String[] args) throws IOException, InterruptedException {
         // 4 slaves assumed
-        double[] test = new double[1000 * 1000];
-        int slaveNum = 4;
+        //double[] test = new double[1000 * 1000];
+        double[] test = null;
+        int slaveNum = 2;
         LinkedList<Double[]> mList = new LinkedList<Double[]>();
 
         //String dir = "tachyon://localhost:19998";
         //String fileName = "/BinData";
         String dir = "./resource";
         String fileName = "/BinData";
+        int rows = 1000;
+        int cols = 1000;
         try {
             FileSystemInitializer fs = FileSystemAdaptorFactory.BuildFileSystemAdaptor(FileSystemType.LOCAL, dir);
             DataHandler t = DataHandlerFactory.BuildDataHandler(FileSystemType.LOCAL);
-            test = t.getDataInDouble(fs.getFsHandler(), fileName, 1000 * 1000);
-            System.out.println(test[1000 * 1000 - 1]);
+            test = t.getDataInDouble(fs.getFsHandler(), fileName, rows * cols);
+            System.out.println(test[rows * cols - 1]);
         } catch (IOException e) {
         }
 
 
         int port = 8888;
         MasterMiddleWare commu = new MasterMiddleWare(port);
-        DistributedSVD svd = new DistributedSVD(commu,slaveNum,test);
+        DistributedSVD svd = new DistributedSVD(commu,slaveNum,test, rows, cols);
 
         commu.startMaster();
         BufferedReader br = new BufferedReader(new InputStreamReader(System.in));

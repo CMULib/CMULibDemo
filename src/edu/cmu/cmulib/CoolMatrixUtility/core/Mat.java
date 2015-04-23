@@ -185,10 +185,10 @@ public class Mat {
 		return result;
 	}
 
-    public Mat setCols(int start, int end, Mat o) {
-        assert(start >=0 && end < this.cols && end - start + 1 == o.cols && this.rows == o.rows);
-        for (int m = 0; m < (end - start + 1) * this.rows; m++) {
-            this.data[start*this.rows + m] = o.data[m];
+    public Mat setCols(int i, int j, Mat o) {
+        assert(i >=0 && j < this.cols && i <= j && j - i + 1 == o.cols && this.rows == o.rows);
+        for (int m = 0; m < (j - i + 1) * this.rows; m++) {
+            this.data[m + i * this.rows] = o.data[m];
         }
         return this;
     }
@@ -275,7 +275,7 @@ public class Mat {
 	/**
 	 * Clone the matrix Deep copy
 	 * 
-	 * @return A new matrix which is identical to the orginal one.
+	 * @return A new matrix which is identical to the original one.
 	 */
 	public Mat clone() {
 		return new Mat(this.rows, this.cols, this.data.clone());

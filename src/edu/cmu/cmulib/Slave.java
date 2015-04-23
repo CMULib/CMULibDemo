@@ -99,7 +99,8 @@ public class Slave {
 	public static void main (String[] args) throws IOException {
         
         // initialize original matrix
-        double[] test = new double[1000*1000];
+        //double[] test = new double[1000*1000];
+        double[] test = null;
 		int rows = 1000;
 		int cols = 1000;
         String address = args[0];
@@ -114,8 +115,8 @@ public class Slave {
         try {
             FileSystemInitializer fs = FileSystemAdaptorFactory.BuildFileSystemAdaptor(FileSystemType.LOCAL, dir);
             DataHandler t = DataHandlerFactory.BuildDataHandler(FileSystemType.LOCAL);
-            test = t.getDataInDouble(fs.getFsHandler(), fileName, 1000 * 1000);
-            System.out.println(test[1000*1000-1]);
+            test = t.getDataInDouble(fs.getFsHandler(), fileName, rows * cols);
+            System.out.println(test[rows * cols - 1]);
         } catch (IOException e) {
         }
     
@@ -133,7 +134,7 @@ public class Slave {
         sdSlave.startSlave();
         
 		Slave_getSplitedMatrix split = new Slave_getSplitedMatrix(score);
-		Slave_SVD svd = new Slave_SVD();
+		Slave_kSVD svd = new Slave_kSVD(2);
 
         // update L using equation L=SS(trans)L
         while(true){
@@ -144,7 +145,7 @@ public class Slave {
                     tagList.remove();
                     S = split.construct();
                     L = svd.Slave_UpdateL(S);
-                    printArray(L.data);
+                    //printArray(L.data);
                     sendMat(L,sdSlave);
 
                 }
@@ -152,7 +153,7 @@ public class Slave {
             //receive L
             synchronized (mList) {
                 if (mList.size() > 0) {
-                    System.out.println("enter slave synchronized");
+                    //System.out.println("enter slave synchronized");
                     L = getMat(mList);
                     svd.setL(L);
                 }

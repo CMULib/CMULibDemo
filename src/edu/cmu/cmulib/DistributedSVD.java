@@ -18,18 +18,22 @@ import java.util.LinkedList;
 public class DistributedSVD implements Runnable {
     MasterMiddleWare commu;
     double[] test;
+    int rows;
+    int cols;
     int slaveNum;
     LinkedList<Double[]> mList = new LinkedList<Double[]>();
     String output;
     boolean isFinished;
 
-    public DistributedSVD(MasterMiddleWare middleWare, int slaveNum, double[] test) {
+    public DistributedSVD(MasterMiddleWare middleWare, int slaveNum, double[] test, int rows, int cols) {
         commu = middleWare;
         this.test = test;
         this.slaveNum = slaveNum;
         commu.register(Double[].class, mList);
         this.output = "";
         this.isFinished = false;
+        this.rows = rows;
+        this.cols = cols;
     }
 
     @Override
@@ -38,8 +42,6 @@ public class DistributedSVD implements Runnable {
         int q = 0;
         output = "";
 
-        int rows = 1000;
-        int cols = 1000;
         Mat score = new Mat(rows, cols, test);
         Tag tag;
         Mat Like, slaveL;
@@ -82,7 +84,8 @@ public class DistributedSVD implements Runnable {
             }
 
             Like = svd.getUpdateL();
-            MatOp.vectorNormalize(Like, MatOp.NormType.NORM_L2);
+            //Like = MatOp.vectorNormalize(Like, MatOp.NormType.NORM_L2);
+            Like = MatOp.matNormalize(Like, MatOp.NormType.NORM_L2);
         } while (!svd.isPerformed(Like));     //termination of iteration
         System.out.println("final  ");
         output += "final  ";
