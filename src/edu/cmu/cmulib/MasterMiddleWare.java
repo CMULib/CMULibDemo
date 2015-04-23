@@ -4,6 +4,7 @@ import edu.cmu.cmulib.Communication.*;
 import java.util.LinkedList;
 import java.util.Queue;
 import java.io.IOException;
+import java.util.concurrent.ConcurrentLinkedDeque;
 
 public class MasterMiddleWare implements MiddleWare {
     public class MsgItem {
@@ -21,19 +22,20 @@ public class MasterMiddleWare implements MiddleWare {
     //
     private MasterNode masterNode;
 
-    public Queue<CommonPacket> packets;
+    public ConcurrentLinkedDeque<CommonPacket> packets;
     
     public PacketHandler packetHandler;
 
     public int port;
     
-    public void register(Class<?> clazz, Queue list){
-		packetHandler.register(clazz, list);
+    public void register(Class<?> clazz, ConcurrentLinkedDeque queue){
+		packetHandler.register(clazz, queue);
 	}
     
     public MasterMiddleWare(int nPort) {
         port = nPort;
-    	packets = new LinkedList<CommonPacket>();
+    	//packets = new LinkedList<CommonPacket>();
+        packets = new ConcurrentLinkedDeque<>();
     	packetHandler = new PacketHandler();
     }
 

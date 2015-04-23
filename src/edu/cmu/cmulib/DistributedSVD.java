@@ -11,6 +11,7 @@ import edu.cmu.cmulib.CoolMatrixUtility.help.Tag;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.LinkedList;
+import java.util.concurrent.ConcurrentLinkedDeque;
 
 /**
  * Created by handixu on 4/18/15.
@@ -21,7 +22,8 @@ public class DistributedSVD implements Runnable {
     int rows;
     int cols;
     int slaveNum;
-    LinkedList<Double[]> mList = new LinkedList<Double[]>();
+    //LinkedList<Double[]> mList = new LinkedList<Double[]>();
+    ConcurrentLinkedDeque<Double[]> mList = new ConcurrentLinkedDeque<>();
     String output;
     boolean isFinished;
 
@@ -109,7 +111,7 @@ public class DistributedSVD implements Runnable {
         return ret;
     }
 
-    public static Mat getMat(LinkedList<Double[]> mList) {
+    /*public static Mat getMat(LinkedList<Double[]> mList) {
         Double[] temp = mList.peek();
         double row = temp[0];
         double col = temp[1];
@@ -121,6 +123,17 @@ public class DistributedSVD implements Runnable {
         mList.remove();
         return mat;
 
+    }*/
+    public static Mat getMat(ConcurrentLinkedDeque<Double[]> mList) {
+        Double[] temp = mList.poll();
+        double row = temp[0];
+        double col = temp[1];
+        double[] arr = new double[temp.length - 2];
+        for (int k = 0; k < arr.length; k++) {
+            arr[k] = temp[k + 2];
+        }
+        Mat mat = new Mat((int) row, (int) col, arr);
+        return mat;
     }
 
 

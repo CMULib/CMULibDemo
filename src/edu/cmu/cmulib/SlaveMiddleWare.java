@@ -4,12 +4,13 @@ import edu.cmu.cmulib.Communication.*;
 import java.io.IOException;
 import java.util.LinkedList;
 import java.util.Queue;
+import java.util.concurrent.ConcurrentLinkedDeque;
 
 public class SlaveMiddleWare implements MiddleWare {
     //
     private SlaveNode slaveNode;
 
-    public Queue<CommonPacket> packets;
+    public ConcurrentLinkedDeque<CommonPacket> packets;
     
     public PacketHandler packetHandler;
 
@@ -30,7 +31,7 @@ public class SlaveMiddleWare implements MiddleWare {
     }
 
     public SlaveMiddleWare(String nAddress, int nPort) {
-    	packets = new LinkedList<CommonPacket>();
+    	packets = new ConcurrentLinkedDeque<>();
     	packetHandler = new PacketHandler();
         address = nAddress;
         port = nPort;
@@ -41,8 +42,8 @@ public class SlaveMiddleWare implements MiddleWare {
         slaveNode.connect();
     }
     
-    public void register(Class<?> clazz, Queue list){
-		packetHandler.register(clazz, list);
+    public void register(Class<?> clazz, ConcurrentLinkedDeque queue){
+		packetHandler.register(clazz, queue);
 	}
 
     public void sendPacket(CommonPacket packet){

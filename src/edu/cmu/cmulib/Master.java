@@ -109,7 +109,7 @@ public class Master {
             return "Not enough slaves";
         }
 
-        DistributedSVD svd_t = new DistributedSVD(commu,this.slaveNum,test, 1000, 1000);
+        DistributedSVD svd_t = new DistributedSVD(commu, this.slaveNum, test, 1000, 1000);
         Thread t = new Thread(svd_t);
         t.run();
 
@@ -135,7 +135,7 @@ public class Master {
         //double[] test = new double[1000 * 1000];
         double[] test = null;
         int slaveNum = 4;
-        LinkedList<Double[]> mList = new LinkedList<Double[]>();
+        //LinkedList<Double[]> mList = new LinkedList<Double[]>();
 
         //String dir = "tachyon://localhost:19998";
         //String fileName = "/BinData";
@@ -154,16 +154,16 @@ public class Master {
 
         int port = 8888;
         MasterMiddleWare commu = new MasterMiddleWare(port);
-        DistributedSVD svd = new DistributedSVD(commu,slaveNum,test, rows, cols);
+        DistributedSVD svd = new DistributedSVD(commu, slaveNum, test, rows, cols);
 
         commu.startMaster();
         BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
 
         while (true) {
             String line = br.readLine();
-            if(line.startsWith("show")){
-                System.out.println("Current Connected Slave : "+ commu.slaveNum());
-            }else if(line.startsWith("start")){
+            if (line.startsWith("show")) {
+                System.out.println("Current Connected Slave : " + commu.slaveNum());
+            } else if (line.startsWith("start")) {
                 Thread t = new Thread(svd);
                 t.start();
             }
@@ -176,37 +176,11 @@ public class Master {
         System.out.println();
     }
 
-    private String dispArray(double[] arr){
+    private String dispArray(double[] arr) {
         String s = "";
-        for(double i: arr)
-            s+= i + " ";
-        s+= "\n";
+        for (double i : arr)
+            s += i + " ";
+        s += "\n";
         return s;
-    }
-
-
-    public static Mat getMat(LinkedList<Double[]> mList) {
-        Double[] temp = mList.peek();
-        double row = temp[0];
-        double col = temp[1];
-        double[] arr = new double[temp.length - 2];
-        for (int k = 0; k < arr.length; k++) {
-            arr[k] = temp[k + 2];
-        }
-        Mat mat = new Mat((int) row, (int) col, arr);
-        mList.remove();
-        return mat;
-    }
-
-    public static void sendMat(Mat mat, int id, MasterMiddleWare m) {
-        Double[] array = new Double[mat.data.length + 2];
-        array[0] = Double.valueOf(mat.rows);
-        array[1] = Double.valueOf(mat.cols);
-
-        for (int k = 0; k < mat.data.length; k++)
-            array[k + 2] = Double.valueOf(mat.data[k]);
-        CommonPacket packet = new CommonPacket(-1, array);
-
-        m.sendPacket(id, packet);
     }
 }

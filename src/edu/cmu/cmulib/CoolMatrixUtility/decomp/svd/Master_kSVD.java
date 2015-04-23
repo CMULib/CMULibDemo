@@ -9,8 +9,8 @@ import edu.cmu.cmulib.CoolMatrixUtility.core.MatOp;
 public class Master_kSVD {
     private Mat L, updateL, src;          // original L, updated L, and source Matrix
     public int subNum;    				 // number of parts to split
-    private static double EPS = 1e-5;     // The termination of iteration
-    private static int MAX_ITER = 1000;    // The max loop of iteration
+    private static double EPS = 1e-6;     // The termination of iteration
+    private static int MAX_ITER = 1500;    // The max loop of iteration
     public int iter;						 // current numbers of loop for iteration
     private static double ALPHA = 0.9;   // coefficient of iteration
     private int updateNum;                // number of updates, need to equal to subNum
@@ -70,22 +70,6 @@ public class Master_kSVD {
      */
     public boolean isPerformed (Mat newL) {
         if (MatOp.dist(newL, this.L, MatOp.NormType.NORM_L2) < EPS || iter > MAX_ITER)
-            return true;
-        else
-            return false;
-    }
-    /**
-     * isPerformed no parameter
-     * compare original L with updated L, to check if complete the iteration
-     */
-    public boolean isPerformed () {
-        if (updateNum < subNum) {
-            System.out.println("@@@@@");
-            return false;
-        }
-        //this.updateL = MatOp.vectorNormalize(this.updateL, MatOp.NormType.NORM_L2);
-        this.updateL = MatOp.matNormalize(this.updateL, MatOp.NormType.NORM_L2);
-        if (MatOp.dist(this.updateL, this.L, MatOp.NormType.NORM_L2) < EPS || iter > MAX_ITER)
             return true;
         else
             return false;

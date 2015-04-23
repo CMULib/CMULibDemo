@@ -1,13 +1,15 @@
 package edu.cmu.cmulib.Communication;
-import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Queue;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentLinkedDeque;
+
 public class PacketHandler {
 	@SuppressWarnings("rawtypes")
-	HashMap<Class<?>, Queue> map = new HashMap<Class<?>,Queue>();
+	ConcurrentHashMap<Class<?>, ConcurrentLinkedDeque> map = new ConcurrentHashMap<>();
 	
-	public void register(Class<?> clazz, Queue list){
-		map.put(clazz, list);
+	public void register(Class<?> clazz, ConcurrentLinkedDeque queue){
+		map.put(clazz, queue);
     }
 	@SuppressWarnings("unchecked")
 	public void handlePacket(Object obj){
@@ -20,7 +22,7 @@ public class PacketHandler {
 		}
     }
 	
-	public static void main(String[] args){
+	/*public static void main(String[] args){
 		LinkedList<String> sList = new LinkedList<String>();
 		LinkedList<Double> dList = new LinkedList<Double>();
 		PacketHandler p = new PacketHandler();
@@ -32,7 +34,7 @@ public class PacketHandler {
 		System.out.println(dList.get(0));
 		
 		
-	}
+	}*/
 	
 	
 }

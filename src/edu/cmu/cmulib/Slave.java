@@ -8,6 +8,7 @@ import edu.cmu.cmulib.CoolMatrixUtility.help.Tag;
 
 import java.io.IOException;
 import java.util.LinkedList;
+import java.util.concurrent.ConcurrentLinkedDeque;
 
 import edu.cmu.cmulib.FileSystemAdaptor.*;
 import edu.cmu.cmulib.Communication.CommonPacket;
@@ -21,8 +22,10 @@ public class Slave {
     String dir = "./resource";
     String fileName = "/BinData";
 
-    LinkedList<Double[]> mList = null;
-    LinkedList<Tag> tagList = null;
+    //LinkedList<Double[]> mList = null;
+    ConcurrentLinkedDeque<Double[]> mList = null;
+    //LinkedList<Tag> tagList = null;
+    ConcurrentLinkedDeque<Tag> tagList = null;
     Mat score = null;
     Mat S = null;
     Mat L = null;
@@ -56,8 +59,9 @@ public class Slave {
         } catch (IOException e) {
         }
 
-        mList = new LinkedList<Double[]>();
-        tagList = new LinkedList<Tag>();
+        mList = new ConcurrentLinkedDeque<Double[]>();
+        //tagList = new LinkedList<Tag>();
+        tagList = new ConcurrentLinkedDeque<>();
 
         score = new Mat(rows, cols ,test);
 
@@ -120,8 +124,10 @@ public class Slave {
         } catch (IOException e) {
         }
     
-		LinkedList<Double[]> mList = new LinkedList<Double[]>();
-        LinkedList<Tag> tagList = new LinkedList<Tag>();
+		//LinkedList<Double[]> mList = new LinkedList<Double[]>();
+        //LinkedList<Tag> tagList = new LinkedList<Tag>();
+        ConcurrentLinkedDeque<Double[]> mList = new ConcurrentLinkedDeque<>();
+        ConcurrentLinkedDeque<Tag> tagList = new ConcurrentLinkedDeque<>();
         
 		Mat score = new Mat(rows, cols ,test);
         Mat S, L;
@@ -141,8 +147,8 @@ public class Slave {
             //receive tag and compute L
             synchronized (tagList) {
                 if (tagList.size() > 0) {
-                    split.setTag(tagList.peek());
-                    tagList.remove();
+                    split.setTag(tagList.poll());
+                    //tagList.remove();
                     S = split.construct();
                     L = svd.Slave_UpdateL(S);
                     //printArray(L.data);
@@ -162,7 +168,7 @@ public class Slave {
 	}
 
 	
-	public static Mat getMat(LinkedList<Double[]> mList){
+	/*public static Mat getMat(LinkedList<Double[]> mList){
 		Double [] temp = mList.peek();
     	double row = temp[0];
     	double col = temp[1];
@@ -174,7 +180,19 @@ public class Slave {
         mList.remove();
         return mat;
 		
-	}
+	}*/
+    public static Mat getMat(ConcurrentLinkedDeque<Double[]> mList) {
+        Double[] temp = mList.poll();
+        double row = temp[0];
+        double col = temp[1];
+        double[] arr = new double[temp.length - 2];
+        for (int k = 0; k < arr.length; k++) {
+            arr[k] = temp[k + 2];
+        }
+        Mat mat = new Mat((int) row, (int) col, arr);
+        return mat;
+    }
+
 	
 	public static void sendMat(Mat mat,SlaveMiddleWare m){
 		Double [] array = new Double[mat.data.length+2];
