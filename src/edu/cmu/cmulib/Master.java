@@ -134,7 +134,7 @@ public class Master {
         // 4 slaves assumed
         //double[] test = new double[1000 * 1000];
         double[] test = null;
-        int slaveNum = 2;
+        int slaveNum = 4;
         LinkedList<Double[]> mList = new LinkedList<Double[]>();
 
         //String dir = "tachyon://localhost:19998";

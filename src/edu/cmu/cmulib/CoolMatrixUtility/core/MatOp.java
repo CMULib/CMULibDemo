@@ -190,9 +190,41 @@ public class MatOp {
      */
     public static Mat matNormalize(Mat src, NormType normType) {
         for (int j = 0; j < src.cols; j++) {
-            Mat temp = src.colRange(j, j);
-            double sum = norm(temp, normType);
-            src.setCols(j, j, temp.mul(1.0/sum));
+            //Mat temp = src.colRange(j, j);
+            double sum = 0.0;
+            int idx = 0;
+            switch (normType) {
+                // L1 norm, get absolute value of all elements, return the squared
+                // root of sum
+                case NORM_L1: {
+                    for (int i = 0; i < src.rows; i++) {
+                        idx = i + j *src.rows;
+                        sum += (src.data[idx] < 0) ?
+                                -src.data[idx] :
+                                src.data[idx];
+                    }
+                    break;
+                }
+
+                // L2 norm, get sum of squared of all elements, return the squared
+                // root of sum
+                case NORM_L2: {
+                    for (int i = 0; i < src.rows; i++) {
+                        idx = i + j *src.rows;
+                        sum += src.data[idx] * src.data[idx];
+                    }
+                    sum = Math.sqrt(sum);
+                    break;
+                }
+
+                default:
+                    break;
+            }
+
+            for (int i = 0; i < src.rows; i++) {
+                idx = i + j * src.rows;
+                src.data[idx] = src.data[idx]/sum;
+            }
         }
         return src;
     }
