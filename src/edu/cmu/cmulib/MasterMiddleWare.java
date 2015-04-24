@@ -62,9 +62,9 @@ public class MasterMiddleWare implements MiddleWare {
     public void msgReceived(int nodeId, CommonPacket packet) {
     	packet.setSlaveId(nodeId);
 
-    	synchronized(packetHandler){
+    	//synchronized(packetHandler){
       
     	    packetHandler.handlePacket(packet.getObject());
-    	}
+    	//}
     }
 }
