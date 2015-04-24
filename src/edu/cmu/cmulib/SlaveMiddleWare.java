@@ -51,14 +51,14 @@ public class SlaveMiddleWare implements MiddleWare {
     }
 
     public void msgReceived(int nodeID, CommonPacket packet) {
-    	//synchronized (packets) {
+    	synchronized (packets) {
             packets.add(packet);
-        //}
+        }
     	
-    	//synchronized(packetHandler){
+    	synchronized(packetHandler){
     	    packetHandler.handlePacket(packet.getObject());
-    	//}
+    	}
 
-        System.out.println("on recieved");
+        System.out.println("on received");
     }
 }

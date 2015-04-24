@@ -35,6 +35,7 @@ public class SlaveNode {
     public void send(CommonPacket packet){
         try {
 			oos.writeObject(packet);
+            oos.flush();
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
