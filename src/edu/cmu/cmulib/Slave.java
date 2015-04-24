@@ -78,7 +78,7 @@ public class Slave {
     public void execute() {
         while(true){
             //receive tag and compute L
-            synchronized (tagList) {
+            //synchronized (tagList) {
                 if (tagList.size() > 0) {
                     split.setTag(tagList.peek());
                     tagList.remove();
@@ -88,15 +88,15 @@ public class Slave {
                     sendMat(L,sdSlave);
 
                 }
-            }
+            //}
             //receive L
-            synchronized (mList) {
+            //synchronized (mList) {
                 if (mList.size() > 0) {
                     System.out.println("enter slave synchronized");
                     L = getMat(mList);
                     svd.setL(L);
                 }
-            }
+            //}
         }
     }
 
@@ -140,12 +140,12 @@ public class Slave {
         sdSlave.startSlave();
         
 		Slave_getSplitedMatrix split = new Slave_getSplitedMatrix(score);
-		Slave_kSVD svd = new Slave_kSVD(3);
+		Slave_kSVD svd = new Slave_kSVD(4);
 
         // update L using equation L=SS(trans)L
         while(true){
             //receive tag and compute L
-            synchronized (tagList) {
+            //synchronized (tagList) {
                 if (tagList.size() > 0) {
                     split.setTag(tagList.poll());
                     //tagList.remove();
@@ -155,15 +155,15 @@ public class Slave {
                     sendMat(L,sdSlave);
 
                 }
-            }
+            //}
             //receive L
-            synchronized (mList) {
+            //synchronized (mList) {
                 if (mList.size() > 0) {
                     //System.out.println("enter slave synchronized");
                     L = getMat(mList);
                     svd.setL(L);
                 }
-            }
+            //}
         }
 	}
 

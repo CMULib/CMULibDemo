@@ -9,8 +9,8 @@ import edu.cmu.cmulib.CoolMatrixUtility.core.MatOp;
 public class Master_kSVD {
     private Mat L, updateL, src;          // original L, updated L, and source Matrix
     public int subNum;    				 // number of parts to split
-    private static double EPS = 1e-6;     // The termination of iteration
-    private static int MAX_ITER = 1500;    // The max loop of iteration
+    private static double EPS = 1e-7;     // The termination of iteration
+    private static int MAX_ITER = 3000;    // The max loop of iteration
     public int iter;						 // current numbers of loop for iteration
     private static double ALPHA = 0.9;   // coefficient of iteration
     private int updateNum;                // number of updates, need to equal to subNum

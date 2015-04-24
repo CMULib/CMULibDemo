@@ -49,7 +49,7 @@ public class DistributedSVD implements Runnable {
         Mat Like, slaveL;
 
         Master_Spliter split = new Master_Spliter(score, slaveNum);
-        Master_kSVD svd = new Master_kSVD(score, slaveNum, 3);
+        Master_kSVD svd = new Master_kSVD(score, slaveNum, 4);
         if(commu.slaveNum() < slaveNum) {
             System.out.println(commu.slaveNum()+ " is less than required number");
             System.exit(1);
@@ -76,13 +76,13 @@ public class DistributedSVD implements Runnable {
             }
             // receive L and update
             while (remain > 0) {
-                synchronized (mList) {
+                //synchronized (mList) {
                     if (mList.size() > 0) {
                         slaveL = getMat(mList);
                         svd.update_SVD(slaveL);
                         remain--;
                     }
-                }
+                //}
             }
 
             Like = svd.getUpdateL();
