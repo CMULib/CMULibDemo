@@ -53,8 +53,8 @@ public class BinaryDataGenerator {
   public static void main(String argv[]) {
     BinaryDataGenerator g = new BinaryDataGenerator();
     try {
-      double[] data = g.read("./resource/svd.data.txt");
-      //double[] data = g.read("./resource/data.txt");
+      //double[] data = g.read("./resource/svd.data.txt");
+      double[] data = g.read("./resource/data.txt");
       g.write(data);
       //g.readtest("/Users/yiranfei/Desktop/BinData");
     } catch (IOException e) {

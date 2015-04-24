@@ -105,8 +105,8 @@ public class Slave {
         // initialize original matrix
         //double[] test = new double[1000*1000];
         double[] test = null;
-		int rows = 1000;
-		int cols = 1000;
+		int rows = 8;
+		int cols = 4;
         String address = args[0];
         int port = Integer.parseInt(args[1]);
         int q = 0;
@@ -140,7 +140,7 @@ public class Slave {
         sdSlave.startSlave();
         
 		Slave_getSplitedMatrix split = new Slave_getSplitedMatrix(score);
-		Slave_kSVD svd = new Slave_kSVD(2);
+		Slave_kSVD svd = new Slave_kSVD(3);
 
         // update L using equation L=SS(trans)L
         while(true){

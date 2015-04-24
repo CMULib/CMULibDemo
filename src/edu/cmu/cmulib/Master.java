@@ -141,8 +141,8 @@ public class Master {
         //String fileName = "/BinData";
         String dir = "./resource";
         String fileName = "/BinData";
-        int rows = 1000;
-        int cols = 1000;
+        int rows = 8;
+        int cols = 4;
         try {
             FileSystemInitializer fs = FileSystemAdaptorFactory.BuildFileSystemAdaptor(FileSystemType.LOCAL, dir);
             DataHandler t = DataHandlerFactory.BuildDataHandler(FileSystemType.LOCAL);
